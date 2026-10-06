@@ -1,0 +1,12 @@
+.env
+venv/
+*.sql
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.DS_Store
+.claude/settings.local.json
+node_modules/
+skills/property-query-parser/cities.txt

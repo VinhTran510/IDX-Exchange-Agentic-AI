@@ -1,0 +1,28 @@
+{
+  "name": "idx-exchange-intern",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinhTran510/IDX-Exchange-Agentic-AI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/VinhTran510/IDX-Exchange-Agentic-AI/issues"
+  },
+  "homepage": "https://github.com/VinhTran510/IDX-Exchange-Agentic-AI#readme",
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2"
+  }
+}
