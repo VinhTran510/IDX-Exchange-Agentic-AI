@@ -10,3 +10,4 @@ coverage/
 .claude/settings.local.json
 node_modules/
 skills/property-query-parser/cities.txt
+.env.*
