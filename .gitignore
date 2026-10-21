@@ -11,3 +11,4 @@ coverage/
 node_modules/
 skills/property-query-parser/cities.txt
 .env.*
+.sessions/

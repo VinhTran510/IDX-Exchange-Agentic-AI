@@ -5,6 +5,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRunner } from "../../src/readOnlyDb.ts";
 import { describeFilters, runSearch } from "../../src/searchPipeline.ts";
+import { handleTurn } from "../../src/conversation.ts";
+import { fileStore } from "../../src/sessionStore.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -18,15 +20,21 @@ const args = process.argv.slice(2);
 let source: "active" | "sold" = "active";
 let page: number | undefined;
 let limit: number | undefined;
+let sessionId: string | undefined;
+let more = false;
+let oneShot = false;
 const words: string[] = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--sold") source = "sold";
   else if (args[i] === "--page") page = Number(args[++i]);
   else if (args[i] === "--limit") limit = Number(args[++i]);
+  else if (args[i] === "--session") sessionId = args[++i];
+  else if (args[i] === "--more") more = true;
+  else if (args[i] === "--oneshot") oneShot = true;
   else words.push(args[i]);
 }
 const query = words.join(" ").trim();
-if (!query) fail('Usage: node runSearch.ts [--sold] [--page N] [--limit N] "<request>"');
+if (!query && !more) fail('Usage: node runSearch.ts [--session ID] [--more] [--sold|--oneshot] "<request>"');
 if (query.length > 500) fail("Request too long (max 500 characters).");
 
 // ---- credentials: read-only account from .env.agent --------------------------
@@ -46,9 +54,22 @@ const cities = existsSync(citiesPath)
 let db;
 try {
   db = createRunner();
-  const result = await runSearch(query, db.run, { source, page, limit, cities });
-  console.log(`Filters: ${describeFilters(result.filters)}`);
-  console.log(result.text);
+  // Conversation mode is the default so it works even if the caller forgets --session.
+  // Stateless mode is only for --sold and --oneshot. A bare "--page N" (N > 1) means "next page".
+  const stateless = source === "sold" || oneShot;
+  if (!stateless) {
+    sessionId = sessionId ?? "default";
+    more = more || (page !== undefined && page > 1);
+  }
+  if (!stateless && sessionId) {
+    // Multi-turn mode: remembers preferences per session and asks follow-up questions.
+    const store = fileStore(join(here, "../../.sessions"));
+    console.log(await handleTurn(sessionId, query, db.run, store, { cities, more }));
+  } else {
+    const result = await runSearch(query, db.run, { source, page, limit, cities });
+    console.log(`Filters: ${describeFilters(result.filters)}`);
+    console.log(result.text);
+  }
 } catch (err) {
   // Print only the error code, never connection details.
   const code = (err as { code?: string }).code ?? "unknown";

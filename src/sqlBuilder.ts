@@ -122,7 +122,7 @@ export function buildActiveSearch(f: PropertyFilters, opts: PageOptions = {}): Q
     }
   }
   return finish(
-    `L_City, L_SystemPrice, L_Keyword2, LM_Dec_3, LM_Int2_3, L_Type_, PoolPrivateYN, ViewYN, AssociationFee`,
+    `L_Address, L_City, L_Zip, L_SystemPrice, L_Keyword2, LM_Dec_3, LM_Int2_3, L_Type_, PhotoCount, PoolPrivateYN, ViewYN, AssociationFee`,
     "rets_property",
     where,
     params,

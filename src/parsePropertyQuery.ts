@@ -203,7 +203,7 @@ export function parsePropertyQuery(query: string, opts: ParseOptions = {}): Prop
   }
   if (result.city === null) {
     const fallback = text.match(
-      /\b(?:in|near|around|at)\s+([A-Za-z][A-Za-z.' -]*?)(?=\s+(?:under|below|over|above|with|without|for|that|and|at|near|,)\b|\s*[,.]|\s*$)/i
+      /\b(?:in|near|around|at)\s+(?!(?:least|most|the|a|an|any|my|our|total|about|around|under|over)\b)([A-Za-z][A-Za-z.' -]*?)(?=\s+(?:under|below|over|above|with|without|for|that|and|at|near|,)\b|\s*[,.]|\s*$)/i
     );
     if (fallback) result.city = titleCase(fallback[1].trim());
   }

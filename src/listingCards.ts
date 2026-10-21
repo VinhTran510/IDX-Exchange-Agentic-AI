@@ -17,9 +17,15 @@ export function formatActiveCard(r: Row, i: number): string {
   if (yes(r.ViewYN)) extras.push("View");
   const hoa = Number(r.AssociationFee);
   extras.push(Number.isFinite(hoa) && hoa > 0 ? `HOA ${money(hoa)}/mo` : "No HOA listed");
+  const street = String(r.L_Address ?? "").trim();
+  const zip = String(r.L_Zip ?? "").trim();
+  const address = street ? `${street}, ${r.L_City ?? ""}, CA ${zip}`.replace(/,\s*,/g, ",").trim() : "Address not listed";
+  const photos = Number(r.PhotoCount);
+  const photoText = Number.isFinite(photos) && photos > 0 ? `${photos} photos` : "no photos";
   return [
     `${i}. ${money(r.L_SystemPrice)} - ${r.L_Type_ ?? "Home"} in ${r.L_City ?? "unknown city"}`,
-    `   ${num(r.L_Keyword2)} bd | ${num(r.LM_Dec_3)} ba | ${num(r.LM_Int2_3)} sqft`,
+    `   ${address}`,
+    `   ${num(r.L_Keyword2)} bd | ${num(r.LM_Dec_3)} ba | ${num(r.LM_Int2_3)} sqft | ${photoText}`,
     `   ${extras.join(" | ")}`,
   ].join("\n");
 }

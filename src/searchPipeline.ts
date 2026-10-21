@@ -43,7 +43,6 @@ export function describeFilters(f: PropertyFilters): string {
 
 export async function runSearch(query: string, run: Run, opts: SearchOptions = {}): Promise<SearchResult> {
   const filters = parsePropertyQuery(query, { cities: opts.cities });
-  const source = opts.source ?? "active";
 
   if (filters.warnings.length > 0) {
     return { filters, ran: false, total: 0, text: filters.warnings.join("\n") };
@@ -51,7 +50,12 @@ export async function runSearch(query: string, run: Run, opts: SearchOptions = {
   if (!hasAnyFilter(filters)) {
     return { filters, ran: false, total: 0, text: "I couldn't find any search criteria. Tell me a city, price range, or number of bedrooms." };
   }
+  return searchWithFilters(filters, run, opts);
+}
 
+/** Run an already-parsed filter set (used by the multi-turn conversation). */
+export async function searchWithFilters(filters: PropertyFilters, run: Run, opts: SearchOptions = {}): Promise<SearchResult> {
+  const source = opts.source ?? "active";
   const limit = opts.limit ?? DEFAULT_PAGE_SIZE;
   const page = opts.page ?? 1;
   const q = source === "sold" ? buildSoldSearch(filters, { page, limit }) : buildActiveSearch(filters, { page, limit });
