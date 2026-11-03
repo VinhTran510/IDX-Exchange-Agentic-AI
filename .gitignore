@@ -12,3 +12,4 @@ node_modules/
 skills/property-query-parser/cities.txt
 .env.*
 .sessions/
+.cache/

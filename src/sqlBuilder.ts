@@ -96,7 +96,9 @@ function finish(
 }
 
 /** Active listings from rets_property. No agent email/phone columns are selected. */
-export function buildActiveSearch(f: PropertyFilters, opts: PageOptions = {}): Query {
+const ACTIVE_CARD_COLS = `L_ListingID, L_Address, L_City, L_Zip, L_SystemPrice, L_Keyword2, LM_Dec_3, LM_Int2_3, L_Type_, PhotoCount, PoolPrivateYN, ViewYN, AssociationFee`;
+
+function activeWhere(f: PropertyFilters): { where: string[]; params: (string | number)[] } {
   const where = [`L_Status = 'Active'`];
   const params: (string | number)[] = [];
   commonClauses(
@@ -121,14 +123,34 @@ export function buildActiveSearch(f: PropertyFilters, opts: PageOptions = {}): Q
       params.push(f.maxHoa);
     }
   }
-  return finish(
-    `L_Address, L_City, L_Zip, L_SystemPrice, L_Keyword2, LM_Dec_3, LM_Int2_3, L_Type_, PhotoCount, PoolPrivateYN, ViewYN, AssociationFee`,
-    "rets_property",
-    where,
+  return { where, params };
+}
+
+/** Active listings from rets_property. No agent email/phone columns are selected. */
+export function buildActiveSearch(f: PropertyFilters, opts: PageOptions = {}): Query {
+  const { where, params } = activeWhere(f);
+  return finish(ACTIVE_CARD_COLS, "rets_property", where, params, "L_SystemPrice ASC", opts);
+}
+
+export const MAX_CANDIDATE_IDS = 20000;
+
+/** IDs of every active listing matching the filters (the candidate set for semantic ranking). */
+export function buildActiveIdSearch(f: PropertyFilters): { sql: string; params: (string | number)[] } {
+  const { where, params } = activeWhere(f);
+  return {
+    sql: `SELECT L_ListingID FROM rets_property WHERE ${where.join(" AND ")} LIMIT ${MAX_CANDIDATE_IDS}`,
     params,
-    "L_SystemPrice ASC",
-    opts,
-  );
+  };
+}
+
+/** Card columns for specific listings (at most MAX_ROWS ids). */
+export function buildActiveByIds(ids: string[]): { sql: string; params: string[] } {
+  const wanted = ids.slice(0, MAX_ROWS);
+  if (wanted.length === 0) throw new Error("buildActiveByIds needs at least one id");
+  return {
+    sql: `SELECT ${ACTIVE_CARD_COLS} FROM rets_property WHERE L_Status = 'Active' AND L_ListingID IN (${wanted.map(() => "?").join(", ")})`,
+    params: wanted,
+  };
 }
 
 /** Closed sales from california_sold. CloseDate is text, so compare as YYYY-MM-DD strings. */
