@@ -26,6 +26,16 @@ export class VectorIndex {
     this.vectors = vectors;
   }
 
+  rowById: Map<string, number> | null = null;
+
+  /** The stored (unit-length) vector for a listing id, or null when that listing was not embedded. */
+  vectorFor(id: string): Float32Array | null {
+    if (!this.rowById) this.rowById = new Map(this.ids.map((v, i) => [v, i]));
+    const row = this.rowById.get(id);
+    if (row === undefined) return null;
+    return this.vectors.subarray(row * this.meta.dims, (row + 1) * this.meta.dims);
+  }
+
   /** Top k by cosine similarity (vectors are unit length, so a dot product). Optionally limited to `allowed` ids. */
   topK(query: Float32Array, k: number, allowed?: Set<string>): Hit[] {
     const dims = this.meta.dims;

@@ -47,6 +47,7 @@ export async function handleTurn(
     session.page += 1;
     session.conversationStep += 1;
     const r = await searchWithFilters(asFilters(session.filters), run, { page: session.page });
+    session.lastShown = r.shown ?? [];
     store.save(sessionId, session);
     return `Filters: ${describeFilters(r.filters)}\n${r.text}`;
   }
@@ -78,6 +79,7 @@ export async function handleTurn(
   }
 
   const r = await searchWithFilters(asFilters(f), run, { page: session.page });
+  session.lastShown = r.shown ?? [];
   store.save(sessionId, session);
   return `Filters: ${describeFilters(r.filters)}\n${r.text}\n\n${HINT}`;
 }

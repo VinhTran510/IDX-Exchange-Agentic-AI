@@ -13,6 +13,8 @@ export interface UserSession {
   page: number;
   conversationStep: number;
   updatedAt: number;
+  /** Listings shown most recently, so "more like #3" can find the listing. n = the number on the card. */
+  lastShown?: { n: number; id: string }[];
 }
 
 export interface SessionStore {

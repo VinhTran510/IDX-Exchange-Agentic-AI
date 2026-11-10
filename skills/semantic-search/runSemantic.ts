@@ -8,6 +8,7 @@ import { createEmbedder } from "../../src/embeddingClient.ts";
 import { loadIndex } from "../../src/vectorIndex.ts";
 import { semanticSearch } from "../../src/semanticSearch.ts";
 import { describeFilters } from "../../src/searchPipeline.ts";
+import { fileStore, newSession } from "../../src/sessionStore.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../..");
@@ -42,6 +43,13 @@ try {
   const result = await semanticSearch(query, db.run, embedder, index, { cities });
   console.log(`Filters: ${describeFilters(result.filters)}`);
   console.log(result.text);
+  if (result.shown && result.shown.length > 0) {
+    // Remember what was shown so "more like #2" works on these results.
+    const store = fileStore(join(root, ".sessions"));
+    const session = store.load("default") ?? newSession();
+    session.lastShown = result.shown;
+    store.save("default", session);
+  }
 } catch (err) {
   const code = (err as { code?: string }).code ?? "unknown";
   fail(`Search error (${code}).`);

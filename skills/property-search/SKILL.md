@@ -1,6 +1,6 @@
 ---
 name: property-search
-description: Conversational property search over the MLS database (read-only). Run it for EVERY message about finding, refining or resetting a home search, including short replies like "under 1.2M", "show me more" and "start over". It remembers preferences, asks the follow-up questions itself, and returns cards with address, price, beds/baths and photo count.
+description: Conversational property search over the MLS database (read-only). Run it for EVERY message about finding, refining or resetting a home search, including short replies like "under 1.2M", "show me more" and "start over". It remembers preferences, asks the follow-up questions itself, and returns cards with address, price, beds/baths and photo count. Not for "more like / similar to" a listing (use similar-listings).
 metadata:
   openclaw:
     requires:
@@ -11,7 +11,7 @@ metadata:
 
 Parses each message, remembers preferences for this conversation, asks one follow-up question at a
 time when something important is missing, and prints listing cards. Use this instead of running
-`property-query-parser` separately.
+`property-query-parser` separately. For "more like #3" or "similar to <address>", use `similar-listings` instead.
 
 ## Conversation mode (always, for every message about the search)
 
