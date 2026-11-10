@@ -17,6 +17,7 @@ export interface SearchResult {
   ran: boolean;
   total: number;
   text: string;
+  shown?: { n: number; id: string }[];
 }
 
 export function hasAnyFilter(f: PropertyFilters): boolean {
@@ -62,5 +63,6 @@ export async function searchWithFilters(filters: PropertyFilters, run: Run, opts
 
   const [countRows, rows] = await Promise.all([run(q.countSql, q.countParams), run(q.sql, q.params)]);
   const total = Number(countRows[0]?.total ?? 0);
-  return { filters, ran: true, total, text: formatResults(rows, total, source, page, limit) };
+  const shown = rows.map((r, k) => ({ n: (page - 1) * limit + k + 1, id: String(r.L_ListingID) })).filter((e) => e.id !== "undefined");
+  return { filters, ran: true, total, text: formatResults(rows, total, source, page, limit), shown };
 }

@@ -17,6 +17,7 @@ export interface SemanticResult {
   filters: PropertyFilters;
   ran: boolean;
   text: string;
+  shown?: { n: number; id: string }[];
 }
 
 export async function semanticSearch(
@@ -54,10 +55,9 @@ export async function semanticSearch(
   const q = buildActiveByIds(hits.map((h) => h.id));
   const rows = await run(q.sql, q.params);
   const byId = new Map(rows.map((r) => [String(r.L_ListingID), r]));
-  const cards = hits
-    .map((h) => byId.get(h.id))
-    .filter((r): r is Record<string, unknown> => r !== undefined)
-    .map((r, i) => formatActiveCard(r, i + 1));
+  const found = hits.map((h) => byId.get(h.id)).filter((r): r is Record<string, unknown> => r !== undefined);
+  const cards = found.map((r, i) => formatActiveCard(r, i + 1));
+  const shown = found.map((r, i) => ({ n: i + 1, id: String(r.L_ListingID) }));
   if (cards.length === 0) return { filters, ran: true, text: "Those listings are no longer active. Please try again." };
 
   const note = allowed && allowed.size >= MAX_CANDIDATE_IDS ? " (searched the first 20,000 matching listings)" : "";
@@ -65,6 +65,7 @@ export async function semanticSearch(
   return {
     filters,
     ran: true,
+    shown,
     text: `Searching: ${scope}${note}\nTop ${cards.length} listings by description similarity:\n\n${cards.join("\n\n")}`,
   };
 }
